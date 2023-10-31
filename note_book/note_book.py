@@ -1,17 +1,11 @@
-from classes import Record, AddressBook
+from classes import Note, NotesBook
 
 def input_error(func):
-    '''
-    Обробка винятків
-    '''
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except ValueError as e:
-            if str(e) in ["Phone number must be 10 digits long", "Birthday must be in the format DD.MM.YYYY"]:
-                return str(e)
-            else:
-                return "Give me correct data please"
+        except ValueError:
+            return "Give me correct data please"
         except IndexError:
             return "Missing arguments"
         except KeyError:
@@ -19,137 +13,87 @@ def input_error(func):
     return inner
 
 @input_error
-def add_contact(args, book):
-    '''
-    Додає новий контакт до словника контактів
-    '''
-    name, phone = args
-    record = Record(name)
-    record.add_phone(phone)
-    book.add_record(record)
-
-    return "Contact added."
+def add_note(args, book):
+    title, description_lines = args[0], args[1:]
+    description = ' '.join(description_lines)
+    
+    note = Note(title, description)
+    book.add_note(note)
+    return "Note added."
 
 @input_error
-def change_contact(args, book):
-    '''
-    Оновлює номер телефону існуючого контакту
-    '''
-    name, phone = args
-    record = book.find(name)
-    if record:
-        record.edit_phone(record.phones[0].value, phone)
-        return f"Contact updated."
-    else:
-        return "Not found."
+def edit_note(args, book):
+    title = args[0]
+    description_lines = args[1:]
+    description = ' '.join(description_lines)
+
+    note = book.find(title)
+    if not note:
+        return "Note not found."
+
+    note.description = description
+    return "Note updated."
 
 @input_error
-def show_phone(args, book):
-    '''
-    Відображає номер телефону контакту
-    '''
-    [name] = args
-    record = book.find(name)
-    if record:
-        return ', '.join(map(str, record.phones))
-    else:
-        return f"Not found."
+def show_note(args, book):
+    [title] = args
+    note = book.find(title)
+
+    if note:
+        return f"Title: {note.title}\nDescription: {note.description}"
+    return f"No note found with title '{title}'"
 
 @input_error
 def show_all(book):
     '''
-    Відображає всі збережені контакти
+    Відображає всі збережені нотатки
     '''
     if not book.data:
-        return "No contacts stored."
+        return "No notes stored."
 
-    return '\n'.join([f"{record.name}: {', '.join(map(str, record.phones))}" for record in book.data.values()])
-    
+    return '\n'.join([f"Title: {note.title}\nDescription: {note.description}\n---" for note in book.data.values()])
+
 @input_error
-def add_birthday(args, book):
-    '''
-    Додає дату дня народження до контакту
-    '''
-    name, birthday = args
-    record = book.find(name)
-    if record:
-        record.add_birthday(birthday)
-        return f"Birthday added."
+def delete_note(args, book):
+    [title] = args
+    if book.find(title):
+        book.delete(title)
+        return "Note deleted."
     else:
-        return "Contact not found."
-
-@input_error
-def show_birthday(args, book):
-    '''
-    Відображає дату дня народження по контакту
-    '''
-    [name] = args
-    record = book.find(name)
-    if record and record.birthday:
-        return str(record.birthday)
-    else:
-        return "No birthday found for this contact."
-
-@input_error
-def show_birthdays_next_week(book):
-    '''
-    Відображає дні народження на наступному тижні
-    '''
-    birthdays_next_week = book.get_birthdays_per_week()
-    if not birthdays_next_week:
-        return "No birthdays next week."
-
-    response = []
-    for day, names in birthdays_next_week.items():
-        response.append(f"{day}: {', '.join(names)}")
-
-    return "\n".join(response)
+        return "Not found."
 
 def hello_command():
     return "How can I help you?"
-    
+
 def parse_input(user_input):
-    '''
-    Обробляє введені дані, розділяючи рядок на команду та аргументи
-    '''
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
 
 def main():
-    '''
-    Головна функція, де знаходиться логіка бота
-    '''
-    book = AddressBook()
-    print("Welcome to the assistant bot!")
+    book = NotesBook()
+    print("Welcome to the notes assistant!")
 
     while True:
-        user_input = input("Enter a command: ")  # Отримання команди від користувача
-        command, *args = parse_input(user_input)  # Парсинг команди
-
-        # Перевірка команд та відповідна дія
+        user_input = input("Enter a command (add, edit, show, delete, exit): ")
+        command, *args = parse_input(user_input)
         if command == "hello":
             print(hello_command())
         elif command == "add":
-            print(add_contact(args, book))
-        elif command == "change":
-            print(change_contact(args, book))
-        elif command == "phone":
-            print(show_phone(args, book))
+            print(add_note(args, book))
+        elif command == "edit":
+            print(edit_note(args, book))
+        elif command == "show":
+            print(show_note(args, book))
         elif command == "all":
             print(show_all(book))
-        elif command == "add-birthday":
-            print(add_birthday(args, book))
-        elif command == "show-birthday":
-            print(show_birthday(args, book))
-        elif command == "birthdays":
-            print(show_birthdays_next_week(book))
+        elif command == "delete":
+            print(delete_note(args, book))
         elif command in ["close", "exit"]:
             print("Good bye!")
-            break  # Вихід
+            break
         else:
             print(f"Command '{command}' not recognized")
 
-# Точка входу
 if __name__ == "__main__":
     main()
