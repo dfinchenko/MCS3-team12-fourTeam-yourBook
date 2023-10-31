@@ -116,6 +116,7 @@ def parse_input(user_input):
     cmd = cmd.strip().lower()
     return cmd, *args
 
+# todo
 def main():
     '''
     Головна функція, де знаходиться логіка бота
