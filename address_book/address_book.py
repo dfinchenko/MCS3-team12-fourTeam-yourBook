@@ -74,7 +74,10 @@ def show_all(book):
 
 @input_error
 def add_address(args, book):
-    name, address = args
+    if len(args) < 2:
+        return "Missing arguments for adding address. Please provide a name and an address."
+
+    name, address = args[0], ' '.join(args[1:])
     record = book.find(name)
     if record:
         record.add_address(address)
