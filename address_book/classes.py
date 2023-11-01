@@ -16,6 +16,17 @@ class Name(Field):
         super().__init__(name)
 
 
+class Address(Field):
+    def __init__(self, address):
+        super().__init__(address)
+
+class Email(Field):
+    def __init__(self, email):
+        if not "@" in email:
+            raise ValueError("Invalid email address")
+        super().__init__(email)
+
+
 class Phone(Field):
     def __init__(self, phone):
         if not (len(phone) == 10 and phone.isdigit()):
@@ -37,6 +48,8 @@ class Birthday(Field):
 class Record:
     def __init__(self, name, birthday=None):
         self.name = Name(name)
+        self.address = None
+        self.email = None
         self.birthday = Birthday(birthday) if birthday else None
         self.phones = []
 
@@ -66,6 +79,13 @@ class Record:
                 return phone
         return None
     
+    def add_address(self, address):
+        self.address = Address(address)
+
+    def add_email(self, email):
+        self.email = Email(email)
+
+
     def add_birthday(self, birthday):
         self.birthday = Birthday(birthday)
 
