@@ -81,16 +81,19 @@ class AddressBook(UserDict):
         if isinstance(record, Record):
             self.data[record.name.value] = record
 
-    def find(self, name):
-        '''
-        Пошук записів за іменем
-        '''
-        return self.data.get(name)
+    def search(self, search_string):
+        search_string = search_string.lower()
+        matching_records = []
+        for record in self.data.values():
+            if (
+                search_string in record.name.value.lower()
+                or search_string in record.birthday.value.strftime("%d.%m.%Y")
+                or any(search_string in phone.value for phone in record.phones)
+            ):
+                matching_records.append(record)
+        return matching_records
 
-    def delete(self, name):
-        '''
-        Видалення записів за іменем
-        '''
+    def delete_record(self, name):
         if name in self.data:
             del self.data[name]
 
