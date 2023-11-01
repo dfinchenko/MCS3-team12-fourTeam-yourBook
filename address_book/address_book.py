@@ -12,6 +12,9 @@ def input_error(func):
                 return str(e)
             else:
                 return "Give me correct data please"
+        except AttributeError as e:
+            if "NoneType" in str(e):
+                return "Attribute 'value' is missing"
         except IndexError:
             return "Missing arguments"
         except KeyError:
@@ -116,6 +119,26 @@ def parse_input(user_input):
     cmd = cmd.strip().lower()
     return cmd, *args
 
+
+@input_error
+def search_contact(args, book):
+    search_string = args[0]
+    matching_records = book.search(search_string)
+    if matching_records:
+        return "\n".join(str(record) for record in matching_records)
+    else:
+        return "No matching contacts found."
+
+@input_error
+def delete_contact(args, book):
+    name = args[0]
+    if name in book.data:
+        book.delete_record(name)
+        return "Contact deleted."
+    else:
+        return "Contact not found."
+
+# todo
 def main():
     '''
     Головна функція, де знаходиться логіка бота
@@ -144,6 +167,10 @@ def main():
             print(show_birthday(args, book))
         elif command == "birthdays":
             print(show_birthdays_next_week(book))
+        elif command == "search":
+            print(search_contact(args, book))
+        elif command == "delete":
+            print(delete_contact(args, book))
         elif command in ["close", "exit"]:
             print("Good bye!")
             break  # Вихід
