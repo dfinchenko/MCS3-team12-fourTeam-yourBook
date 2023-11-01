@@ -66,7 +66,10 @@ def show_all(book):
     if not book.data:
         return "No contacts stored."
 
-    return '\n'.join([f"{record.name}: {', '.join(map(str, record.phones))}" for record in book.data.values()])
+    contact_details = [str(record) for record in book.data.values()]
+    
+    separator = '-' * 10
+    return f'\n{separator}\n'.join(contact_details)
 
 
 @input_error

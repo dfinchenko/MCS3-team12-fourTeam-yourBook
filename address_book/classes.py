@@ -90,7 +90,16 @@ class Record:
         self.birthday = Birthday(birthday)
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
+        details = [f"Contact name: {self.name.value}"]
+        if self.phones:
+            details.append(f"Phones: {', '.join(map(str, self.phones))}")
+        if self.address:
+            details.append(f"Address: {self.address.value}")
+        if self.email:
+            details.append(f"Email: {self.email.value}")
+        if self.birthday:
+            details.append(f"Birthday: {self.birthday.value.strftime('%d.%m.%Y')}")
+        return '\n'.join(details)
 
 
 class AddressBook(UserDict):
