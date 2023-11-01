@@ -81,6 +81,12 @@ class AddressBook(UserDict):
         if isinstance(record, Record):
             self.data[record.name.value] = record
 
+    def find(self, name):
+        '''
+        Пошук записів за іменем
+        '''
+        return self.data.get(name)
+
     def search(self, search_string):
         search_string = search_string.lower()
         matching_records = []
