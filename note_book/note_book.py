@@ -1,4 +1,5 @@
 from classes import Note, NotesBook
+import json
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -44,6 +45,19 @@ def show_note(args, book):
     return f"No note found with title '{title}'"
 
 @input_error
+def search_notes(args, book):
+    [term] = args
+    if len(term) < 3:
+        return "Search term need at least 3 characters."
+
+    results = book.search(term)
+
+    if not results:
+        return "No matching notes found."
+    
+    return '\n'.join([f"Title: {note.title}\nDescription: {note.description}\n---" for note in results])
+
+@input_error
 def show_all(book):
     '''
     Відображає всі збережені нотатки
@@ -70,12 +84,34 @@ def parse_input(user_input):
     cmd = cmd.strip().lower()
     return cmd, *args
 
+def load_notes(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            book = NotesBook()
+            for key, note_data in data.items():
+                note = Note(note_data['title'], note_data['description'])
+                book.add_note(note)
+            return book
+    except (FileNotFoundError, EOFError, json.JSONDecodeError):
+        return NotesBook()
+
+def save_notes(book, filename):
+    data = {}
+    for key, note in book.data.items():
+        data[key] = {
+            'title': note.title.value,
+            'description': note.description.value
+        }
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+
 def main():
     book = NotesBook()
     print("Welcome to the notes assistant!")
 
     while True:
-        user_input = input("Enter a command (add, edit, show, delete, exit): ")
+        user_input = input("Enter a command (add, edit, show, search, all, delete, exit): ")
         command, *args = parse_input(user_input)
         if command == "hello":
             print(hello_command())
@@ -89,7 +125,10 @@ def main():
             print(show_all(book))
         elif command == "delete":
             print(delete_note(args, book))
+        elif command == "search":
+            print(search_notes(args, book))
         elif command in ["close", "exit"]:
+            save_notes(book, "notes.dat")
             print("Good bye!")
             break
         else:
