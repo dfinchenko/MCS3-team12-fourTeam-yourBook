@@ -30,6 +30,13 @@ class NotesBook(UserDict):
 
     def find(self, title):
         return self.data.get(title)
+    
+    def search(self, term):
+        matches = []
+        for note in self.data.values():
+            if term.lower() in note.title.value.lower() or term.lower() in note.description.value.lower():
+                matches.append(note)
+        return matches
 
     def delete(self, title):
         if title in self.data:
