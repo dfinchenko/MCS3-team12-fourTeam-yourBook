@@ -1,4 +1,6 @@
 from collections import UserDict
+import json
+import os
 
 class Field:
     def __init__(self, value):
@@ -41,3 +43,19 @@ class NotesBook(UserDict):
     def delete(self, title):
         if title in self.data:
             del self.data[title]
+
+    def load_notes(self, filename):
+        if not os.path.isfile(filename):
+            self.data = {}
+            return
+
+        with open(filename, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            for key, note_data in data.items():
+                note = Note(note_data['title'], note_data['description'])
+                self.add_note(note)
+
+    def save_notes(self, filename):
+        data = {key: {'title': note.title.value, 'description': note.description.value} for key, note in self.data.items()}
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False)

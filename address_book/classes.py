@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 import calendar
 from collections import defaultdict
 from collections import UserDict
+import json
+import os
 
 class Field:
     def __init__(self, value):
@@ -164,3 +166,45 @@ class AddressBook(UserDict):
         
         return birthdays
     
+    def load_address_book(self, path):
+        if not os.path.isfile(path):
+            self.data = {}
+            return
+
+        with open(path, 'r', encoding='utf-8') as file:
+            records_list = json.load(file)
+
+            for record_dict in records_list:
+                name = record_dict['name']
+                address = record_dict.get('address')
+                email = record_dict.get('email')
+                birthday = record_dict.get('birthday')
+                phones = record_dict.get('phones', [])
+
+                record = Record(name, birthday=birthday)
+                if address:
+                    record.add_address(address)
+                if email:
+                    record.add_email(email)
+                for phone_number in phones:
+                    record.add_phone(phone_number)
+
+                self.add_record(record)
+
+    def save_address_book(self, filename):
+        '''
+        Зберігання адресної книги в файл
+        '''
+        with open(filename, 'w') as file:
+            records_list = []
+            for record in self.data.values():
+                record_dict = {
+                    'name': record.name.value,
+                    'phones': [phone.value for phone in record.phones],
+                    'birthday': record.birthday.value.strftime('%d.%m.%Y') if record.birthday else None,
+                    'address': record.address.value if record.address else None,
+                    'email': record.email.value if record.email else None,
+                }
+                records_list.append(record_dict)
+            
+            json.dump(records_list, file, ensure_ascii=False)
