@@ -87,6 +87,19 @@ class Record:
             if phone.value == phone_number:
                 return phone
         return None
+    
+    def search(self, search_string):
+        search_string = search_string.lower()
+        matching_records = []
+        for record in self.data.values():
+            if (
+                search_string in record.name.value.lower()
+                or search_string in record.birthday.value.strftime("%d.%m.%Y")
+                or any(search_string in phone.value for phone in record.phones)
+                or any(search_string in email.value for email in record.emails)
+            ):
+                matching_records.append(record)
+        return matching_records
 
     def add_address(self, address):
         self.address = Address(address)
