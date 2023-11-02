@@ -172,8 +172,8 @@ def main():
     '''
     Головна функція, де знаходиться логіка бота
     '''
-    filename = "address_book.json"
-    book = load_address_book(filename)
+    path = "address_book/address_book.json"
+    book = load_address_book(path)
     print("Welcome to the assistant bot!")
 
     while True:
@@ -202,7 +202,7 @@ def main():
         elif command == "delete":
             print(delete_contact(args, book))
         elif command in ["close", "exit"]:
-            save_address_book(book, filename)
+            save_address_book(book, path)
             print("Good bye!")
             break  # Вихід
         else:
