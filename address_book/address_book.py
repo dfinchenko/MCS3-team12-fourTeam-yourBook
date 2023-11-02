@@ -1,5 +1,6 @@
 from classes import Record, AddressBook
 
+
 def input_error(func):
     '''
     Обробка винятків
@@ -8,7 +9,7 @@ def input_error(func):
         try:
             return func(*args, **kwargs)
         except ValueError as e:
-            if str(e) in ["Phone number must be 10 digits long", "Birthday must be in the format DD.MM.YYYY"]:
+            if str(e) in ["Phone number must be 10 digits long", "Birthday must be in the format DD.MM.YYYY", "Email is not validation"]:
                 return str(e)
             else:
                 return "Give me correct data please"
@@ -21,6 +22,7 @@ def input_error(func):
             return "Not found"
     return inner
 
+
 @input_error
 def add_contact(args, book):
     '''
@@ -32,6 +34,7 @@ def add_contact(args, book):
     book.add_record(record)
 
     return "Contact added."
+
 
 @input_error
 def change_contact(args, book):
@@ -46,6 +49,7 @@ def change_contact(args, book):
     else:
         return "Not found."
 
+
 @input_error
 def show_phone(args, book):
     '''
@@ -58,6 +62,7 @@ def show_phone(args, book):
     else:
         return f"Not found."
 
+
 @input_error
 def show_all(book):
     '''
@@ -67,7 +72,7 @@ def show_all(book):
         return "No contacts stored."
 
     contact_details = [str(record) for record in book.data.values()]
-    
+
     separator = '-' * 10
     return f'\n{separator}\n'.join(contact_details)
 
@@ -85,6 +90,7 @@ def add_address(args, book):
     else:
         return "Contact not found."
 
+
 @input_error
 def add_email(args, book):
     name, email = args
@@ -95,6 +101,7 @@ def add_email(args, book):
     else:
         return "Contact not found."
 
+
 @input_error
 def change_address(args, book):
     name, address = args
@@ -104,6 +111,7 @@ def change_address(args, book):
         return "Address changed."
     else:
         return "Contact not found."
+
 
 @input_error
 def change_email(args, book):
@@ -129,6 +137,7 @@ def add_birthday(args, book):
     else:
         return "Contact not found."
 
+
 @input_error
 def show_birthday(args, book):
     '''
@@ -141,24 +150,37 @@ def show_birthday(args, book):
     else:
         return "No birthday found for this contact."
 
+
 @input_error
-def show_birthdays_next_week(book):
+def show_birthdays_in_x_days(args, book):
     '''
-    Відображає дні народження на наступному тижні
+    Виводить список контактів з днями народження через вказану кількість днів
     '''
-    birthdays_next_week = book.get_birthdays_per_week()
-    if not birthdays_next_week:
-        return "No birthdays next week."
+    try:
+        days = int(args[0])
+        if days < 0:
+            return "Please provide a positive number of days."
+    except ValueError:
+        return "Invalid number of days."
+
+    birthdays_in_x_days = book.get_birthdays_in_x_days(days)
+    if not birthdays_in_x_days:
+        return f"No birthdays in {days} days."
 
     response = []
-    for day, names in birthdays_next_week.items():
-        response.append(f"{day}: {', '.join(names)}")
+    for day, names_and_dates in birthdays_in_x_days.items():
+        birthday_strings = [
+            f'{name} ({date.strftime("%d.%m.%Y")})' for name, date in names_and_dates]
+        day_birthdays = ', '.join(birthday_strings)
+        response.append(f"{day}: {day_birthdays}")
 
     return "\n".join(response)
 
+
 def hello_command():
     return "How can I help you?"
-    
+
+
 def parse_input(user_input):
     '''
     Обробляє введені дані, розділяючи рядок на команду та аргументи
@@ -177,6 +199,7 @@ def search_contact(args, book):
     else:
         return "No matching contacts found."
 
+
 @input_error
 def delete_contact(args, book):
     name = args[0]
@@ -185,6 +208,7 @@ def delete_contact(args, book):
         return "Contact deleted."
     else:
         return "Contact not found."
+
 
 def main():
     '''
@@ -196,7 +220,8 @@ def main():
     print("Welcome to the assistant bot!")
 
     while True:
-        user_input = input("Enter a command: ")  # Отримання команди від користувача
+        # Отримання команди від користувача
+        user_input = input("Enter a command: ")
         command, *args = parse_input(user_input)  # Парсинг команди
 
         # Перевірка команд та відповідна дія
@@ -214,8 +239,8 @@ def main():
             print(add_birthday(args, book))
         elif command == "show-birthday":
             print(show_birthday(args, book))
-        elif command == "birthdays":
-            print(show_birthdays_next_week(book))
+        elif command == "birthdays-in-x-days":
+            print(show_birthdays_in_x_days(args, book))
         elif command == "search":
             print(search_contact(args, book))
         elif command == "delete":
@@ -234,6 +259,7 @@ def main():
             break  # Вихід
         else:
             print(f"Command '{command}' not recognized")
+
 
 # Точка входу
 if __name__ == "__main__":
