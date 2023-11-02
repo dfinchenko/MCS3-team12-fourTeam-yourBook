@@ -4,6 +4,8 @@ from collections import defaultdict
 from collections import UserDict
 import json
 import os
+import re
+
 
 class Field:
     def __init__(self, value):
@@ -22,19 +24,23 @@ class Address(Field):
     def __init__(self, address):
         super().__init__(address)
 
+
 class Email(Field):
     def __init__(self, email):
-        if not "@" in email:
-            raise ValueError("Invalid email address")
+        # Регулярний вираз для парсингу email
+        pattern = r'[a-zA-Z][a-zA-Z0-9_.]{1,}@[a-zA-Z]+\.[a-zA-Z]{2,}'
+        if not re.findall(pattern, email):
+            raise ValueError("Email is not validation")
         super().__init__(email)
 
 
 class Phone(Field):
     def __init__(self, phone):
-        if not (len(phone) == 10 and phone.isdigit()):
+        cleaned_number = re.sub(r'[^0-9]', '', phone)
+        if not (len(cleaned_number) == 10 and cleaned_number.isdigit()):
             raise ValueError("Phone number must be 10 digits long")
-        
-        super().__init__(phone)
+
+        super().__init__(cleaned_number)
 
 
 class Birthday(Field):
@@ -43,9 +49,9 @@ class Birthday(Field):
             date = datetime.strptime(birthday, '%d.%m.%Y')
         except ValueError:
             raise ValueError("Birthday must be in the format DD.MM.YYYY")
-        
+
         super().__init__(date)
-    
+
 
 class Record:
     def __init__(self, name, birthday=None):
@@ -66,6 +72,7 @@ class Record:
         '''
         Редагування телефонів
         '''
+        phone = Phone(new_number)
         phone = self.find_phone(old_number)
         if phone:
             phone.value = new_number
@@ -80,13 +87,12 @@ class Record:
             if phone.value == phone_number:
                 return phone
         return None
-    
+
     def add_address(self, address):
         self.address = Address(address)
 
     def add_email(self, email):
         self.email = Email(email)
-
 
     def add_birthday(self, birthday):
         self.birthday = Birthday(birthday)
@@ -100,7 +106,8 @@ class Record:
         if self.email:
             details.append(f"Email: {self.email.value}")
         if self.birthday:
-            details.append(f"Birthday: {self.birthday.value.strftime('%d.%m.%Y')}")
+            details.append(
+                f"Birthday: {self.birthday.value.strftime('%d.%m.%Y')}")
         return '\n'.join(details)
 
 
@@ -134,12 +141,9 @@ class AddressBook(UserDict):
         if name in self.data:
             del self.data[name]
 
-    def get_birthdays_per_week(self):
-        '''
-        Дні народження на наступному тижні
-        '''
+    def get_birthdays_in_x_days(self, days):
         today = datetime.today().date()
-        week_ahead = today + timedelta(days=7)
+        target_date = today + timedelta(days=days)
         birthdays = defaultdict(list)
 
         for name, record in self.data.items():
@@ -151,10 +155,11 @@ class AddressBook(UserDict):
 
                 # Якщо день народження вже був цього року, тоді перевіряємо наступний рік
                 if birthday_this_year < today:
-                    birthday_this_year = birthday_date.replace(year=today.year + 1)
+                    birthday_this_year = birthday_date.replace(
+                        year=today.year + 1)
 
-                # Чи день народження наступного тижня
-                if today <= birthday_this_year <= week_ahead:
+                # Чи день народження через x днів
+                if today <= birthday_this_year <= target_date:
                     day_of_week = birthday_this_year.weekday()
                     day_name = calendar.day_name[day_of_week]
 
@@ -162,10 +167,11 @@ class AddressBook(UserDict):
                     if day_of_week in [5, 6]:
                         day_name = 'Monday'
 
-                    birthdays[day_name].append(record.name.value)
-        
+                    birthdays[day_name].append(
+                        (record.name.value, birthday_this_year))
+
         return birthdays
-    
+
     def load_address_book(self, path):
         if not os.path.isfile(path):
             self.data = {}
@@ -206,5 +212,5 @@ class AddressBook(UserDict):
                     'email': record.email.value if record.email else None,
                 }
                 records_list.append(record_dict)
-            
+
             json.dump(records_list, file, ensure_ascii=False)
