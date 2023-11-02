@@ -67,8 +67,56 @@ def show_all(book):
     if not book.data:
         return "No contacts stored."
 
-    return '\n'.join([f"{record.name}: {', '.join(map(str, record.phones))}" for record in book.data.values()])
+    contact_details = [str(record) for record in book.data.values()]
     
+    separator = '-' * 10
+    return f'\n{separator}\n'.join(contact_details)
+
+
+@input_error
+def add_address(args, book):
+    if len(args) < 2:
+        return "Missing arguments for adding address. Please provide a name and an address."
+
+    name, address = args[0], ' '.join(args[1:])
+    record = book.find(name)
+    if record:
+        record.add_address(address)
+        return "Address added."
+    else:
+        return "Contact not found."
+
+@input_error
+def add_email(args, book):
+    name, email = args
+    record = book.find(name)
+    if record:
+        record.add_email(email)
+        return "Email added."
+    else:
+        return "Contact not found."
+
+@input_error
+def change_address(args, book):
+    name, address = args
+    record = book.find(name)
+    if record:
+        record.address.value = address
+        return "Address changed."
+    else:
+        return "Contact not found."
+
+@input_error
+def change_email(args, book):
+    name, email = args
+    record = book.find(name)
+    if record:
+        record.email.value = email
+        return "Email changed."
+    else:
+        return "Contact not found."
+
+
 @input_error
 def add_birthday(args, book):
     '''
@@ -185,7 +233,7 @@ def main():
             print(hello_command())
         elif command == "add":
             print(add_contact(args, book))
-        elif command == "change":
+        elif command == "change-phone":
             print(change_contact(args, book))
         elif command == "phone":
             print(show_phone(args, book))
@@ -201,6 +249,14 @@ def main():
             print(search_contact(args, book))
         elif command == "delete":
             print(delete_contact(args, book))
+        elif command == "add-address":
+            print(add_address(args, book))
+        elif command == "add-email":
+            print(add_email(args, book))
+        elif command == "change-address":
+            print(change_address(args, book))
+        elif command == "change-email":
+            print(change_email(args, book))
         elif command in ["close", "exit"]:
             save_address_book(book, path)
             print("Good bye!")
