@@ -1,5 +1,4 @@
 from classes import Record, AddressBook
-import json
 
 def input_error(func):
     '''
@@ -186,42 +185,14 @@ def delete_contact(args, book):
         return "Contact deleted."
     else:
         return "Contact not found."
-    
-def load_address_book(filename):
-    try:
-        with open(filename, 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            book = AddressBook()
-            for name, record_data in data.items():
-                record = Record(name)
-                for phone in record_data.get('phones', []):
-                    record.add_phone(phone)
-                birthday = record_data.get('birthday')
-                if birthday:
-                    record.add_birthday(birthday)
-                book.add_record(record)
-            return book
-    except (FileNotFoundError, EOFError, json.JSONDecodeError):
-        return AddressBook()
-
-def save_address_book(book, filename):
-    data = {}
-    for name, record in book.data.items():
-        data[name] = {
-            'phones': [phone.value for phone in record.phones],
-        }
-        # Save birthday if present
-        if record.birthday:
-            data[name]['birthday'] = record.birthday.value.strftime('%d.%m.%Y')
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False)
 
 def main():
     '''
     Головна функція, де знаходиться логіка бота
     '''
     path = "address_book/address_book.json"
-    book = load_address_book(path)
+    book = AddressBook()
+    book.load_address_book(path)
     print("Welcome to the assistant bot!")
 
     while True:
@@ -258,7 +229,7 @@ def main():
         elif command == "change-email":
             print(change_email(args, book))
         elif command in ["close", "exit"]:
-            save_address_book(book, path)
+            book.save_address_book(path)
             print("Good bye!")
             break  # Вихід
         else:

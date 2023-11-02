@@ -1,5 +1,4 @@
 from classes import Note, NotesBook
-import json
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -84,31 +83,10 @@ def parse_input(user_input):
     cmd = cmd.strip().lower()
     return cmd, *args
 
-def load_notes(filename):
-    try:
-        with open(filename, 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            book = NotesBook()
-            for key, note_data in data.items():
-                note = Note(note_data['title'], note_data['description'])
-                book.add_note(note)
-            return book
-    except (FileNotFoundError, EOFError, json.JSONDecodeError):
-        return NotesBook()
-
-def save_notes(book, filename):
-    data = {}
-    for key, note in book.data.items():
-        data[key] = {
-            'title': note.title.value,
-            'description': note.description.value
-        }
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False)
-
 def main():
     path = "note_book/notes.json"
-    book = load_notes(path)
+    book = NotesBook()
+    book.load_notes(path)
     print("Welcome to the notes assistant!")
 
     while True:
@@ -129,7 +107,7 @@ def main():
         elif command == "search":
             print(search_notes(args, book))
         elif command in ["close", "exit"]:
-            save_notes(book, path)
+            book.save_notes(path)
             print("Good bye!")
             break
         else:
