@@ -9,7 +9,7 @@ def input_error(func):
         try:
             return func(*args, **kwargs)
         except ValueError as e:
-            if str(e) in ["Phone number must be 10 digits long", "Birthday must be in the format DD.MM.YYYY", "Email is not validation"]:
+            if str(e) in ["Phone number must be 10 digits long", "Birthday must be in the format DD.MM.YYYY", "Email is not valid"]:
                 return str(e)
             else:
                 return "Give me correct data please"
@@ -25,9 +25,6 @@ def input_error(func):
 
 @input_error
 def add_contact(args, book):
-    '''
-    Додає новий контакт до словника контактів
-    '''
     name, phone = args
     record = Record(name)
     record.add_phone(phone)
@@ -38,9 +35,6 @@ def add_contact(args, book):
 
 @input_error
 def change_contact(args, book):
-    '''
-    Оновлює номер телефону існуючого контакту
-    '''
     name, phone = args
     record = book.find(name)
     if record:
@@ -48,7 +42,6 @@ def change_contact(args, book):
         return f"Contact updated."
     else:
         return "Not found."
-
 
 @input_error
 def show_phone(args, book):
@@ -61,7 +54,6 @@ def show_phone(args, book):
         return ', '.join(map(str, record.phones))
     else:
         return f"Not found."
-
 
 @input_error
 def show_all(book):
@@ -76,7 +68,6 @@ def show_all(book):
     separator = '-' * 10
     return f'\n{separator}\n'.join(contact_details)
 
-
 @input_error
 def add_address(args, book):
     if len(args) < 2:
@@ -89,7 +80,6 @@ def add_address(args, book):
         return "Address added."
     else:
         return "Contact not found."
-
 
 @input_error
 def add_email(args, book):
@@ -123,7 +113,10 @@ def search_contact(args, book):
 
 @input_error
 def change_address(args, book):
-    name, address = args
+    if len(args) < 2:
+        return "Missing arguments for changing address. Please provide a name and an address."
+
+    name, address = args[0], ' '.join(args[1:])
     record = book.find(name)
     if record:
         record.address.value = address
@@ -131,23 +124,19 @@ def change_address(args, book):
     else:
         return "Contact not found."
 
-
 @input_error
 def change_email(args, book):
-    name, email = args
+    name, new_email = args
     record = book.find(name)
     if record:
-        record.email.value = email
-        return "Email changed."
+        result = record.edit_email(new_email)
+        return result
     else:
         return "Contact not found."
 
 
 @input_error
 def add_birthday(args, book):
-    '''
-    Додає дату дня народження до контакту
-    '''
     name, birthday = args
     record = book.find(name)
     if record:
@@ -159,15 +148,23 @@ def add_birthday(args, book):
 
 @input_error
 def show_birthday(args, book):
-    '''
-    Відображає дату дня народження по контакту
-    '''
     [name] = args
     record = book.find(name)
     if record and record.birthday:
         return str(record.birthday)
     else:
         return "No birthday found for this contact."
+
+
+@input_error
+def change_birthday(args, book):
+    name, new_birthday = args
+    record = book.find(name)
+    if record:
+        result = record.edit_birthday(new_birthday)
+        return result
+    else:
+        return "Contact not found."
 
 
 @input_error
@@ -258,6 +255,8 @@ def main():
             print(add_birthday(args, book))
         elif command == "show-birthday":
             print(show_birthday(args, book))
+        elif command == "change-birthday":
+            print(change_birthday(args, book))
         elif command == "birthdays-in-x-days":
             print(show_birthdays_in_x_days(args, book))
         elif command == "search":

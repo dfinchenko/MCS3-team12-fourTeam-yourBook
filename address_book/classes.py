@@ -30,7 +30,7 @@ class Email(Field):
         # Регулярний вираз для парсингу email
         pattern = r'[a-zA-Z][a-zA-Z0-9_.]{1,}@[a-zA-Z]+\.[a-zA-Z]{2,}'
         if not re.findall(pattern, email):
-            raise ValueError("Email is not validation")
+            raise ValueError("Email is not valid")
         super().__init__(email)
 
 
@@ -62,16 +62,10 @@ class Record:
         self.phones = []
 
     def add_phone(self, phone_number):
-        '''
-        Додавання телефонів
-        '''
         phone = Phone(phone_number)
         self.phones.append(phone)
 
     def edit_phone(self, old_number, new_number):
-        '''
-        Редагування телефонів
-        '''
         phone = Phone(new_number)
         phone = self.find_phone(old_number)
         if phone:
@@ -80,9 +74,6 @@ class Record:
         return False
 
     def find_phone(self, phone_number):
-        '''
-        Пошук телефону
-        '''
         for phone in self.phones:
             if phone.value == phone_number:
                 return phone
@@ -100,15 +91,33 @@ class Record:
             ):
                 matching_records.append(record)
         return matching_records
-
+    
     def add_address(self, address):
         self.address = Address(address)
 
     def add_email(self, email):
         self.email = Email(email)
 
+    def edit_email(self, new_email):
+        if self.email:
+            try:
+                new_email = Email(new_email)
+                self.email.value = new_email.value
+                return "Email changed."
+            except ValueError as e:
+                return str(e)
+        return "Email not found."
+
     def add_birthday(self, birthday):
         self.birthday = Birthday(birthday)
+
+    def edit_birthday(self, new_birthday):
+        try:
+            new_birthday = Birthday(new_birthday)
+            self.birthday = new_birthday
+            return "Birthday changed."
+        except ValueError as e:
+            return str(e)
 
     def __str__(self):
         details = [f"Contact name: {self.name.value}"]
@@ -126,16 +135,10 @@ class Record:
 
 class AddressBook(UserDict):
     def add_record(self, record):
-        '''
-        Додавання записів
-        '''
         if isinstance(record, Record):
             self.data[record.name.value] = record
 
     def find(self, name):
-        '''
-        Пошук записів за іменем
-        '''
         return self.data.get(name)
 
     def search(self, search_string):
