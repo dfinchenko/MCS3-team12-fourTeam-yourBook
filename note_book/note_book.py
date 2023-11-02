@@ -104,10 +104,11 @@ def save_notes(book, filename):
             'description': note.description.value
         }
     with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False, indent=4)
+        json.dump(data, file, ensure_ascii=False)
 
 def main():
-    book = NotesBook()
+    filename = "notes.json"
+    book = load_notes(filename)
     print("Welcome to the notes assistant!")
 
     while True:
@@ -128,7 +129,7 @@ def main():
         elif command == "search":
             print(search_notes(args, book))
         elif command in ["close", "exit"]:
-            save_notes(book, "notes.dat")
+            save_notes(book, filename)
             print("Good bye!")
             break
         else:
