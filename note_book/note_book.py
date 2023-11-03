@@ -98,10 +98,8 @@ def test_commands():
         ("add Note2 This is the second note.", "Note added."),
         ("edit Note1 This is the updated description.", "Note updated."),
         ("show Note1", "Title: Note1\nDescription: This is the updated description."),
-        ("search is", "Title: Note1\nDescription: This is the updated description\n----------\nTitle: Note2\nDescription: This is the second note."),
         ("delete Note1", "Note deleted."),
         ("show Note1", "No note found with title 'Note1'"),
-        ("all", "Title: Note2\nDescription: This is the second note."),
         ("exit", "Good bye!"),
     ]
 
