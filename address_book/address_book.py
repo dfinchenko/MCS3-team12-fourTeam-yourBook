@@ -193,9 +193,24 @@ def parse_input(user_input):
 @input_error
 def search_contact(args, book):
     search_string = args[0]
-    matching_records = book.search(search_string)
+    matching_records = book.search_contacts(search_string)
+    
     if matching_records:
-        return "\n".join(str(record) for record in matching_records)
+        result = []
+        for record in matching_records:
+            info = f"Name: {record.name.value}"
+            if record.phones:
+                phones_info = "; ".join(phone.value for phone in record.phones)
+                info += f"\nPhones: {phones_info}"
+            if record.email:
+                info += f"\nEmail: {record.email.value}"
+            if record.address:
+                info += f"\nAddress: {record.address.value}"
+            if record.birthday:
+                info += f"\nBirthday: {record.birthday.value.strftime('%d.%m.%Y')}"
+            result.append(info)
+        
+        return "\n".join(result)
     else:
         return "No matching contacts found."
 
