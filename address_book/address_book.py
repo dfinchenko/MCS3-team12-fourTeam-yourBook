@@ -199,7 +199,7 @@ def show_birthdays_in_x_days(args, book):
 def hello_command():
     return "How can I help you?"
 
-
+@input_error
 def parse_input(user_input):
     '''
     Обробляє введені дані, розділяючи рядок на команду та аргументи
@@ -227,6 +227,73 @@ def delete_contact(args, book):
         return "Contact deleted."
     else:
         return "Contact not found."
+
+def test_address_book_commands():
+    path = "address_book/address_book.json"
+    book = AddressBook()
+    book.load_address_book(path)
+    print("Welcome to the address book assistant testing!")
+
+    test_cases = [
+        ("hello", "How can I help you?"),
+        ("add John 1234567890", "Contact added."),
+        ("add Alice 9876543210", "Contact added."),
+        ("phone John", "1234567890"),
+        ("all", "Name: John\nPhones: 1234567890\n---\nName: Alice Smith\nPhones: 9876543210"),
+        ("change-phone John 9999999999", "Contact updated."),
+        ("search Alice", "Name: Alice\nPhones: 9876543210"),
+        ("delete John", "Contact deleted."),
+        ("add-address Alice 123 Main St", "Address added."),
+        ("add-email Alice alice@example.com", "Email added."),
+        ("change-address Alice 456 Elm St", "Address changed."),
+        ("change-email Alice newemail@example.com", "Email changed."),
+        ("add-birthday Alice 15.07.1990", "Birthday added."),
+        ("show-birthday Alice", "15.07.1990"),
+        ("birthdays-in-x-days 30", "No birthdays in 30 days."),
+        ("exit", "Good bye!"),
+    ]
+
+    for command, expected_output in test_cases:
+        user_input = command
+        command, *args = parse_input(user_input)
+        result = None
+
+        if command == "hello":
+            result = hello_command()
+        elif command == "add":
+            result = add_contact(args, book)
+        elif command == "change-phone":
+            result = change_contact(args, book)
+        elif command == "phone":
+            result = show_phone(args, book)
+        elif command == "all":
+            result = show_all(book)
+        elif command == "delete":
+            result = delete_contact(args, book)
+        elif command == "search":
+            result = search_contact(args, book)
+        elif command == "add-address":
+            result = add_address(args, book)
+        elif command == "add-email":
+            result = add_email(args, book)
+        elif command == "change-address":
+            result = change_address(args, book)
+        elif command == "change-email":
+            result = change_email(args, book)
+        elif command == "add-birthday":
+            result = add_birthday(args, book)
+        elif command == "show-birthday":
+            result = show_birthday(args, book)
+        elif command == "birthdays-in-x-days":
+            result = show_birthdays_in_x_days(args, book)
+        elif command in ["close", "exit"]:
+            book.save_address_book(path)
+            result = "Good bye!"
+
+        if result == expected_output:
+            print(f"Test Passed: '{command}' - Expected: '{expected_output}'")
+        else:
+            print(f"Test Failed: '{command}' - Expected: '{expected_output}', Actual: '{result}'")
 
 
 def main():
