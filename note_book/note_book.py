@@ -54,7 +54,8 @@ def search_notes(args, book):
     if not results:
         return "No matching notes found."
     
-    return '\n'.join([f"Title: {note.title}\nDescription: {note.description}\n---" for note in results])
+    separator = '-' * 10
+    return '\n'.join([f"Title: {note.title}\nDescription: {note.description}\n{separator}" for note in results])
 
 @input_error
 def show_all(book):
@@ -64,7 +65,8 @@ def show_all(book):
     if not book.data:
         return "No notes stored."
 
-    return '\n'.join([f"Title: {note.title}\nDescription: {note.description}\n---" for note in book.data.values()])
+    separator = '-' * 10
+    return f'\n{separator}\n'.join([f"Title: {note.title}\nDescription: {note.description}\n{separator}" for note in book.data.values()])
 
 @input_error
 def delete_note(args, book):
@@ -78,10 +80,58 @@ def delete_note(args, book):
 def hello_command():
     return "How can I help you?"
 
+@input_error
 def parse_input(user_input):
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
+
+def test_commands():
+    path = "note_book/notes.json"
+    book = NotesBook()
+    book.load_notes(path)
+    print("Welcome to the notes assistant testing!")
+
+    test_cases = [
+        ("hello", "How can I help you?"),
+        ("add Note1 This is the first note.", "Note added."),
+        ("add Note2 This is the second note.", "Note added."),
+        ("edit Note1 This is the updated description.", "Note updated."),
+        ("show Note1", "Title: Note1\nDescription: This is the updated description."),
+        ("search is", "Title: Note1\nDescription: This is the updated description\n----------\nTitle: Note2\nDescription: This is the second note."),
+        ("delete Note1", "Note deleted."),
+        ("show Note1", "No note found with title 'Note1'"),
+        ("all", "Title: Note2\nDescription: This is the second note."),
+        ("exit", "Good bye!"),
+    ]
+
+    for command, expected_output in test_cases:
+        user_input = command
+        command, *args = parse_input(user_input)
+        result = None
+
+        if command == "hello":
+            result = hello_command()
+        elif command == "add":
+            result = add_note(args, book)
+        elif command == "edit":
+            result = edit_note(args, book)
+        elif command == "show":
+            result = show_note(args, book)
+        elif command == "all":
+            result = show_all(book)
+        elif command == "delete":
+            result = delete_note(args, book)
+        elif command == "search":
+            result = search_notes(args, book)
+        elif command in ["close", "exit"]:
+            book.save_notes(path)
+            result = "Good bye!"
+        
+        if result == expected_output:
+            print(f"Test Passed: '{command}' - Expected: '{expected_output}'")
+        else:
+            print(f"Test Failed: '{command}' - Expected: '{expected_output}', Actual: '{result}'")
 
 def main():
     path = "note_book/notes.json"
