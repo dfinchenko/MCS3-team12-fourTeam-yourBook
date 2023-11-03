@@ -90,26 +90,6 @@ def add_email(args, book):
         return "Email added."
     else:
         return "Contact not found."
-    
-@input_error
-def search_contact(args, book):
-    search_string = args[0]
-    matching_records = book.search(search_string)
-    if matching_records:
-        result = []
-        for record in matching_records:
-            info = f"Name: {record.name.value}"
-            if record.phones:
-                phones_info = "; ".join(phone.value for phone in record.phones)
-                info += f"\nPhones: {phones_info}"
-            if record.emails:
-                emails_info = "; ".join(email.value for email in record.emails)
-                info += f"\nEmails: {emails_info}"
-            if record.birthday:
-                info += f"\nBirthday: {record.birthday.value.strftime('%d.%m.%Y')}"
-            result.append(info)
-
-        return "".join(result)
 
 @input_error
 def change_address(args, book):
