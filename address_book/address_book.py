@@ -165,7 +165,7 @@ def show_birthday(args, book):
     [name] = args
     record = book.find(name)
     if record and record.birthday:
-        return str(record.birthday)
+        return record.birthday.value.strftime('%d.%m.%Y')
     else:
         return "No birthday found for this contact."
 
