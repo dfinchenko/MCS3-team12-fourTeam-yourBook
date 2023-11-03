@@ -141,16 +141,27 @@ class AddressBook(UserDict):
     def find(self, name):
         return self.data.get(name)
 
-    def search(self, search_string):
+    def search_contacts(self, search_string):
         search_string = search_string.lower()
         matching_records = []
         for record in self.data.values():
             if (
-                search_string in record.name.value.lower()
-                or search_string in record.birthday.value.strftime("%d.%m.%Y")
-                or any(search_string in phone.value for phone in record.phones)
+                record.name and search_string in record.name.value.lower()
+                or (record.birthday and search_string in record.birthday.value.strftime("%d.%m.%Y"))
             ):
                 matching_records.append(record)
+
+            if record.phones:
+                for phone in record.phones:
+                    if search_string in phone.value:
+                        matching_records.append(record)
+
+            if record.email and search_string in record.email.value:
+                matching_records.append(record)
+
+            if record.address and search_string in record.address.value:
+                matching_records.append(record)
+
         return matching_records
 
     def delete_record(self, name):
