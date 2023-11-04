@@ -236,7 +236,7 @@ def edit_note(args, notebook):
     if not note:
         return f"\nNote not found.\n"
 
-    note.description = description
+    note.description.value = description
     return f"\nNote updated.\n"
 
 
