@@ -438,7 +438,7 @@ def main():
         # notebook commands
         elif command == "add-note":
             print(add_note(args, notebook))
-        elif command == "edit-note":
+        elif command == "change-note":
             print(edit_note(args, notebook))
         elif command == "show-note":
             print(show_note(args, notebook))
