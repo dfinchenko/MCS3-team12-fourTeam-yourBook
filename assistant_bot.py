@@ -41,10 +41,13 @@ def change_contact(args, book):
     name, phone = args
     record = book.find(name)
     if record:
-        record.edit_phone(record.phones[0].value, phone)
-        return "\nContact updated.\n"
+        result = record.change_phone(record.phones[0].value, phone)
+        if result:
+            return "\nContact updated.\n"
+        else:
+            return "\nPhone not found.\n"
     else:
-        return "\nNot found.\n"
+        return "\nContact not found.\n"
 
 
 @input_error

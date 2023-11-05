@@ -70,7 +70,7 @@ class Record:
         phone = Phone(phone_number)
         self.phones.append(phone)
 
-    def edit_phone(self, old_number, new_number):
+    def change_phone(self, old_number, new_number):
         phone = Phone(new_number)
         phone = self.find_phone(old_number)
         if phone:
