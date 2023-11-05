@@ -92,10 +92,20 @@ class Record:
     def add_address(self, address):
         self.address = Address(address)
 
+    def change_address(self, new_address):
+        if self.address:
+            try:
+                new_address = Address(new_address)
+                self.address.value = new_address.value
+                return "Address changed."
+            except ValueError as e:
+                return str(e)
+        return "Address not found."
+
     def add_email(self, email):
         self.email = Email(email)
 
-    def edit_email(self, new_email):
+    def change_email(self, new_email):
         if self.email:
             try:
                 new_email = Email(new_email)
@@ -108,7 +118,7 @@ class Record:
     def add_birthday(self, birthday):
         self.birthday = Birthday(birthday)
 
-    def edit_birthday(self, new_birthday):
+    def change_birthday(self, new_birthday):
         try:
             new_birthday = Birthday(new_birthday)
             self.birthday = new_birthday
@@ -139,3 +149,10 @@ class Note:
         details = [f"Note title: {self.title.value}, Description: {self.description.value}"]
     
         return '\n'.join(details)
+
+    def change_note(self, new_description):
+        new_description = Description(new_description)
+        self.description.value = new_description.value
+        
+        return "Note changed."
+        

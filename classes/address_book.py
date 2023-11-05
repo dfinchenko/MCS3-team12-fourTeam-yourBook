@@ -12,8 +12,10 @@ class AddressBook(UserDict):
         if isinstance(record, Record):
             self.data[record.name.value] = record
 
+
     def find(self, name):
         return self.data.get(name)
+
 
     def search_contacts(self, search_string):
         search_string = search_string.lower()
@@ -38,9 +40,11 @@ class AddressBook(UserDict):
 
         return matching_records
 
+
     def delete_record(self, name):
         if name in self.data:
             del self.data[name]
+
 
     def get_birthdays_in_x_days(self, days):
         today = datetime.today().date()
@@ -73,30 +77,35 @@ class AddressBook(UserDict):
 
         return birthdays
 
+
     def load_address_book(self, path):
         if not os.path.isfile(path):
             self.data = {}
             return
+        try:
+            with open(path, 'r', encoding='utf-8') as file:
+                records_list = json.load(file)
 
-        with open(path, 'r', encoding='utf-8') as file:
-            records_list = json.load(file)
+                for record_dict in records_list:
+                    name = record_dict['name']
+                    address = record_dict.get('address')
+                    email = record_dict.get('email')
+                    birthday = record_dict.get('birthday')
+                    phones = record_dict.get('phones', [])
 
-            for record_dict in records_list:
-                name = record_dict['name']
-                address = record_dict.get('address')
-                email = record_dict.get('email')
-                birthday = record_dict.get('birthday')
-                phones = record_dict.get('phones', [])
+                    record = Record(name, birthday=birthday)
+                    if address:
+                        record.add_address(address)
+                    if email:
+                        record.add_email(email)
+                    for phone_number in phones:
+                        record.add_phone(phone_number)
 
-                record = Record(name, birthday=birthday)
-                if address:
-                    record.add_address(address)
-                if email:
-                    record.add_email(email)
-                for phone_number in phones:
-                    record.add_phone(phone_number)
+                    self.add_record(record)
 
-                self.add_record(record)
+        except json.decoder.JSONDecodeError:
+            self.data = {}
+
 
     def save_address_book(self, filename):
         '''

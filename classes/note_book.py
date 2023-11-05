@@ -29,16 +29,19 @@ class NotesBook(UserDict):
             self.data = {}
             return
 
-        with open(filename, 'r', encoding='utf-8') as file:
-            notes_list = json.load(file)
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                notes_list = json.load(file)
 
-            for note_dict in notes_list:
-                title = note_dict['title']
-                description = note_dict.get('description')
+                for note_dict in notes_list:
+                    title = note_dict['title']
+                    description = note_dict.get('description')
 
-                note = Note(title, description)
+                    note = Note(title, description)
 
-                self.add_note(note)
+                    self.add_note(note)
+        except json.decoder.JSONDecodeError:
+            self.data = {}
 
 
     def save_notes(self, filename):
